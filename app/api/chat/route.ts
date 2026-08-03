@@ -22,35 +22,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // 从 Redis 获取当前会话的短期记忆
-    const redis = await getRedis();
-    const sessionKey = `session:${sessionId || 'public'}`;
-    const rawHistory = await redis.get(sessionKey);
-    const history: ConversationMessage[] = rawHistory
-      ? JSON.parse(rawHistory as string)
-      : [];
+    // 从 Redis 获取当前会话的短期记忆（Redis 失败不阻塞对话）
+    let history: ConversationMessage[] = [];
+    try {
+      const redis = await getRedis();
+      const sessionKey = `session:${sessionId || 'public'}`;
+      const rawHistory = await redis.get(sessionKey);
+      history = rawHistory ? JSON.parse(rawHistory as string) : [];
+    } catch (e) {
+      console.warn('读取会话历史失败，使用空历史:', (e as Error).message);
+    }
 
     // 调用公开问答链
     const answer = await handlePublicQuery(message, history);
 
-    // 更新会话历史
-    const updatedHistory: ConversationMessage[] = [
-      ...history,
-      {
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        role: 'assistant',
-        content: answer,
-        timestamp: new Date().toISOString(),
-      },
-    ];
-
-    // 只保留最近 30 条消息
-    const trimmedHistory = updatedHistory.slice(-30);
-    await redis.set(sessionKey, JSON.stringify(trimmedHistory), { ex: 3600 }); // 1 小时过期
+    // 更新会话历史（Redis 失败不阻塞响应）
+    try {
+      const redis = await getRedis();
+      const sessionKey = `session:${sessionId || 'public'}`;
+      const updatedHistory: ConversationMessage[] = [
+        ...history,
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: answer, timestamp: new Date().toISOString() },
+      ];
+      const trimmedHistory = updatedHistory.slice(-30);
+      await redis.set(sessionKey, JSON.stringify(trimmedHistory), { ex: 3600 });
+    } catch (e) {
+      console.warn('保存会话历史失败:', (e as Error).message);
+    }
 
     return NextResponse.json({
       success: true,

@@ -123,16 +123,11 @@ async function createUpstashStore(): Promise<IRedisStore> {
   const client = new Redis({
     url: REDIS_CONFIG.kvRestUrl,
     token: REDIS_CONFIG.kvRestToken,
+    enableAutoPipelining: false,
   });
 
-  // 验证连接
-  try {
-    await client.ping();
-    console.log('[Redis] Upstash REST (Vercel KV) 已连接');
-  } catch (err) {
-    console.warn('[Redis] Upstash 连接失败:', (err as Error).message);
-    throw err;
-  }
+  console.log('[Redis] Upstash REST (Vercel KV) 已初始化');
+  // 不做 ping 验证：serverless 冷启动时额外网络请求可能超时
 
   return {
     async get(key: string) { return await client.get(key); },

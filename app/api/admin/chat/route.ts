@@ -22,35 +22,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // 从 Redis 获取管理端对话历史
-    const redis = await getRedis();
-    const sessionKey = 'admin:session';
-    const rawHistory = await redis.get(sessionKey);
-    const history: ConversationMessage[] = rawHistory
-      ? JSON.parse(rawHistory as string)
-      : [];
+    // 从 Redis 获取管理端对话历史（Redis 失败不阻塞）
+    let history: ConversationMessage[] = [];
+    try {
+      const redis = await getRedis();
+      const sessionKey = 'admin:session';
+      const rawHistory = await redis.get(sessionKey);
+      history = rawHistory ? JSON.parse(rawHistory as string) : [];
+    } catch (e) {
+      console.warn('读取管理端会话失败:', (e as Error).message);
+    }
 
     // 调用管理端对话链
     const { reply, newMemories } = await handleAdminChat(message, history);
 
-    // 更新对话历史
-    const updatedHistory: ConversationMessage[] = [
-      ...history,
-      {
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        role: 'assistant',
-        content: reply,
-        timestamp: new Date().toISOString(),
-      },
-    ];
-
-    // 保留最近 50 条消息（管理端对话更长）
-    const trimmedHistory = updatedHistory.slice(-50);
-    await redis.set(sessionKey, JSON.stringify(trimmedHistory), { ex: 86400 }); // 24 小时过期
+    // 更新对话历史（Redis 失败不阻塞响应）
+    try {
+      const redis = await getRedis();
+      const sessionKey = 'admin:session';
+      const updatedHistory: ConversationMessage[] = [
+        ...history,
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: reply, timestamp: new Date().toISOString() },
+      ];
+      const trimmedHistory = updatedHistory.slice(-50);
+      await redis.set(sessionKey, JSON.stringify(trimmedHistory), { ex: 86400 });
+    } catch (e) {
+      console.warn('保存管理端会话失败:', (e as Error).message);
+    }
 
     return NextResponse.json({
       success: true,
@@ -83,9 +82,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error('获取对话历史出错:', error);
-    return NextResponse.json(
-      { error: '获取对话历史失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      history: [],
+    });
   }
 }

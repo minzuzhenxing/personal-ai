@@ -14,23 +14,28 @@ import type { Memory, CreateMemoryInput, MemoryRetrievalResult } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * 获取所有记忆
+ * 获取所有记忆（Redis 失败时返回空数组，不抛异常）
  */
 export async function getAllMemories(): Promise<Memory[]> {
-  const redis = await getRedis();
-  const all = await redis.hgetall(REDIS_KEYS.memories);
-  if (!all) return [];
+  try {
+    const redis = await getRedis();
+    const all = await redis.hgetall(REDIS_KEYS.memories);
+    if (!all) return [];
 
-  return Object.values(all)
-    .map((v) => {
-      try {
-        return JSON.parse(v as string) as Memory;
-      } catch {
-        return null;
-      }
-    })
-    .filter((m): m is Memory => m !== null)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return Object.values(all)
+      .map((v) => {
+        try {
+          return JSON.parse(v as string) as Memory;
+        } catch {
+          return null;
+        }
+      })
+      .filter((m): m is Memory => m !== null)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (e) {
+    console.error('获取记忆失败:', (e as Error).message);
+    return [];
+  }
 }
 
 /**

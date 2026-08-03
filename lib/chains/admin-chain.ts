@@ -116,7 +116,14 @@ ${memorySummary}
       { role: 'assistant', content: reply, timestamp: new Date().toISOString() },
     ];
 
-    const { newFacts } = await extractAndSaveMemories(allMessages);
+    // 提取并保存记忆（失败不影响对话响应）
+    let newFacts: string[] = [];
+    try {
+      const result = await extractAndSaveMemories(allMessages);
+      newFacts = result.newFacts;
+    } catch (e) {
+      console.warn('记忆提取失败（对话响应不受影响）:', (e as Error).message);
+    }
 
     return { reply, newMemories: newFacts };
   } catch (error) {
