@@ -1,38 +1,29 @@
 /**
- * Redis 客户端 - ioredis + 本地内存回退
+ * Redis 客户端 — 三种模式自适应
  *
- * - 生产环境：连接阿里云 Redis / 腾讯云 Redis 等标准 Redis
- * - 开发/演示：本地内存 Map 模式（无需外部服务，重启丢失）
+ * 1. vercel-kv: Vercel 自动注入 KV_REST_API_URL + KV_REST_API_TOKEN → @upstash/redis REST API
+ * 2. redis:     REDIS_URL 已配置 → ioredis 标准 TCP 连接
+ * 3. memory:    以上均未配置 → 本地内存（开发用，重启丢失）
  */
 
 import { REDIS_CONFIG } from './config';
 
-// ==================== 接口抽象 ====================
-
-/** 统一 Redis 操作接口（兼容 ioredis 和 内存模式） */
+// ==================== 统一接口 ====================
 export interface IRedisStore {
-  // String
   get(key: string): Promise<string | null>;
   set(key: string, value: string, opts?: { ex?: number }): Promise<string | null>;
-
-  // Hash
   hgetall(key: string): Promise<Record<string, string> | null>;
   hget(key: string, field: string): Promise<string | null>;
   hset(key: string, kv: Record<string, string>): Promise<number>;
   hdel(key: string, ...fields: string[]): Promise<number>;
   hexists(key: string, field: string): Promise<number>;
   hlen(key: string): Promise<number>;
-
-  // Sorted Set
   zadd(key: string, ...scoreMembers: Array<{ score: number; member: string }>): Promise<number>;
   zrem(key: string, ...members: string[]): Promise<number>;
-
-  // Generic
   del(...keys: string[]): Promise<number>;
 }
 
 // ==================== 内存模式 ====================
-
 class MemoryStore implements IRedisStore {
   private data = new Map<string, any>();
   private expirations = new Map<string, number>();
@@ -54,9 +45,7 @@ class MemoryStore implements IRedisStore {
 
   async set(key: string, value: string, opts?: { ex?: number }) {
     this.data.set(key, value);
-    if (opts?.ex) {
-      this.expirations.set(key, Date.now() + opts.ex * 1000);
-    }
+    if (opts?.ex) this.expirations.set(key, Date.now() + opts.ex * 1000);
     return 'OK';
   }
 
@@ -82,9 +71,7 @@ class MemoryStore implements IRedisStore {
     const hash = this.data.get(`hash:${key}`);
     if (!hash || typeof hash !== 'object') return 0;
     let count = 0;
-    for (const f of fields) {
-      if (f in hash) { delete hash[f]; count++; }
-    }
+    for (const f of fields) { if (f in hash) { delete hash[f]; count++; } }
     this.data.set(`hash:${key}`, hash);
     return count;
   }
@@ -101,10 +88,7 @@ class MemoryStore implements IRedisStore {
 
   async zadd(key: string, ...scoreMembers: Array<{ score: number; member: string }>) {
     let zset = this.data.get(`zset:${key}`);
-    if (!zset) {
-      zset = new Map<string, number>();
-      this.data.set(`zset:${key}`, zset);
-    }
+    if (!zset) { zset = new Map<string, number>(); this.data.set(`zset:${key}`, zset); }
     let added = 0;
     for (const { score, member } of scoreMembers) {
       if (!zset.has(member)) added++;
@@ -117,16 +101,13 @@ class MemoryStore implements IRedisStore {
     const zset = this.data.get(`zset:${key}`);
     if (!zset) return 0;
     let count = 0;
-    for (const m of members) {
-      if (zset.delete(m)) count++;
-    }
+    for (const m of members) { if (zset.delete(m)) count++; }
     return count;
   }
 
   async del(...keys: string[]) {
     let count = 0;
     for (const key of keys) {
-      // 尝试删除各种类型的 key
       if (this.data.delete(key)) count++;
       if (this.data.delete(`hash:${key}`)) count++;
       if (this.data.delete(`zset:${key}`)) count++;
@@ -135,26 +116,74 @@ class MemoryStore implements IRedisStore {
   }
 }
 
-// ==================== ioredis 模式 ====================
+// ==================== Upstash REST 模式 (Vercel KV) ====================
+async function createUpstashStore(): Promise<IRedisStore> {
+  const { Redis } = await import('@upstash/redis');
 
-let RedisClient: any = null;
+  const client = new Redis({
+    url: REDIS_CONFIG.kvRestUrl,
+    token: REDIS_CONFIG.kvRestToken,
+  });
 
-async function getIORedis(): Promise<IRedisStore> {
-  if (!RedisClient) {
-    const { default: Redis } = await import('ioredis');
+  // 验证连接
+  try {
+    await client.ping();
+    console.log('[Redis] Upstash REST (Vercel KV) 已连接');
+  } catch (err) {
+    console.warn('[Redis] Upstash 连接失败:', (err as Error).message);
+    throw err;
+  }
 
-    // 优先使用完整 URL 连接
-    if (REDIS_CONFIG.url) {
-      RedisClient = new Redis(REDIS_CONFIG.url, {
+  return {
+    async get(key: string) { return await client.get(key); },
+    async set(key: string, value: string, opts?: { ex?: number }) {
+      const result = opts?.ex
+        ? await client.set(key, value, { ex: opts.ex })
+        : await client.set(key, value);
+      return result ?? null;
+    },
+    async hgetall(key: string) { return await client.hgetall(key); },
+    async hget(key: string, field: string) { return await client.hget(key, field); },
+    async hset(key: string, kv: Record<string, string>) {
+      // Upstash hset 支持直接传对象
+      return await client.hset(key, kv as Record<string, unknown>);
+    },
+    async hdel(key: string, ...fields: string[]) {
+      return await client.hdel(key, ...fields);
+    },
+    async hexists(key: string, field: string) {
+      return (await client.hexists(key, field)) ? 1 : 0;
+    },
+    async hlen(key: string) { return await client.hlen(key); },
+    async zadd(key: string, ...scoreMembers: Array<{ score: number; member: string }>) {
+      let added = 0;
+      for (const sm of scoreMembers) {
+        const result = await client.zadd(key, { score: sm.score, member: sm.member });
+        if (result !== null && result !== undefined) added++;
+      }
+      return added;
+    },
+    async zrem(key: string, ...members: string[]) {
+      return await client.zrem(key, ...members);
+    },
+    async del(...keys: string[]) { return await client.del(...keys); },
+  };
+}
+
+// ==================== ioredis 模式（标准 Redis）====================
+async function createIORedisStore(): Promise<IRedisStore> {
+  const { default: RedisClient } = await import('ioredis');
+
+  const redis = REDIS_CONFIG.url
+    ? new RedisClient(REDIS_CONFIG.url, {
         maxRetriesPerRequest: 3,
         retryStrategy(times: number) {
-          if (times > 3) return null; // 3 次后放弃
+          if (times > 3) return null;
           return Math.min(times * 200, 2000);
         },
         lazyConnect: true,
-      });
-    } else {
-      RedisClient = new Redis({
+      })
+    : new RedisClient({
         host: REDIS_CONFIG.host || '127.0.0.1',
         port: REDIS_CONFIG.port,
         password: REDIS_CONFIG.password || undefined,
@@ -165,22 +194,15 @@ async function getIORedis(): Promise<IRedisStore> {
         },
         lazyConnect: true,
       });
-    }
 
-    try {
-      await RedisClient.connect();
-      console.log('[Redis] ioredis 已连接');
-    } catch (err) {
-      console.warn('[Redis] ioredis 连接失败，回退到内存模式:', (err as Error).message);
-      RedisClient = null;
-      return new MemoryStore();
-    }
+  try {
+    await redis.connect();
+    console.log('[Redis] ioredis (标准 Redis) 已连接');
+  } catch (err) {
+    console.warn('[Redis] ioredis 连接失败:', (err as Error).message);
+    throw err;
   }
 
-  return wrapIORedis(RedisClient);
-}
-
-function wrapIORedis(redis: any): IRedisStore {
   return {
     async get(key: string) { return await redis.get(key); },
     async set(key: string, value: string, opts?: { ex?: number }) {
@@ -203,23 +225,33 @@ function wrapIORedis(redis: any): IRedisStore {
   };
 }
 
-// ==================== 统一出口 ====================
-
+// ==================== 统一工厂 ====================
 let store: IRedisStore | null = null;
 
 export async function getRedis(): Promise<IRedisStore> {
   if (store) return store;
 
-  if (REDIS_CONFIG.mode === 'redis' || REDIS_CONFIG.url || REDIS_CONFIG.host) {
+  // 1. Vercel KV (Upstash REST)
+  if (REDIS_CONFIG.mode === 'vercel-kv') {
     try {
-      store = await getIORedis();
+      store = await createUpstashStore();
       return store;
     } catch (err) {
-      console.warn('[Redis] 初始化失败，使用内存模式:', (err as Error).message);
+      console.warn('[Redis] Vercel KV 不可用，回退内存模式:', (err as Error).message);
     }
   }
 
-  // 默认使用内存模式
+  // 2. 标准 Redis (ioredis)
+  if (REDIS_CONFIG.mode === 'redis') {
+    try {
+      store = await createIORedisStore();
+      return store;
+    } catch (err) {
+      console.warn('[Redis] 标准 Redis 不可用，回退内存模式:', (err as Error).message);
+    }
+  }
+
+  // 3. 内存模式（默认）
   console.log('[Redis] 使用本地内存模式（数据不会持久化）');
   store = new MemoryStore();
   return store;

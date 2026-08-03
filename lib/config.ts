@@ -13,18 +13,27 @@ export const QWEN_CONFIG = {
 };
 
 // ========== Redis ==========
-// 优先级: REDIS_URL > KV_URL(Vercel KV 自动注入) > 分开填写的 HOST/PORT
-// 配置了 Redis 地址则自动使用 redis 模式，否则使用本地内存模式
-const _redisUrl = process.env.REDIS_URL || process.env.KV_URL || '';
+// 优先级: Vercel KV (Upstash REST) > REDIS_URL (标准 Redis) > 内存模式
+// Vercel 创建 Upstash Storage 后会自动注入以下两个变量
+const _kvRestUrl = process.env.KV_REST_API_URL || '';
+const _kvRestToken = process.env.KV_REST_API_TOKEN || '';
+const _redisUrl = process.env.REDIS_URL || '';
 
 export const REDIS_CONFIG = {
+  // Vercel KV (REST API)
+  kvRestUrl: _kvRestUrl,
+  kvRestToken: _kvRestToken,
+  // 标准 Redis (TCP)
   url: _redisUrl,
   host: process.env.REDIS_HOST || '',
   port: parseInt(process.env.REDIS_PORT || '6379', 10),
   password: process.env.REDIS_PASSWORD || '',
-  mode: (_redisUrl || process.env.REDIS_MODE === 'redis'
-    ? 'redis'
-    : 'memory') as 'redis' | 'memory',
+  // 自动判断用什么模式
+  mode: (_kvRestUrl && _kvRestToken
+    ? 'vercel-kv'
+    : _redisUrl
+      ? 'redis'
+      : 'memory') as 'vercel-kv' | 'redis' | 'memory',
 };
 
 // ========== 管理端 ==========
