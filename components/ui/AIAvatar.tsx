@@ -11,9 +11,9 @@ export default function AIAvatar({ size = 200, className = '' }: { size?: number
         <path d="M68 95 C68 65, 80 48, 100 48 C120 48, 132 65, 132 95 L132 105 C132 105, 125 95, 100 95 C75 95, 68 105, 68 105 Z" fill="#2A2A2A" />
 
         {/* 脸部 */}
-        <circle cx="100" cy="105" r="38" fill="#FAFAFA" stroke="#E5E5E5" strokeWidth="0.5" />
-        <ellipse cx="75" cy="115" rx="7" ry="4" fill="#E5E5E5" opacity="0.6" />
-        <ellipse cx="125" cy="115" rx="7" ry="4" fill="#E5E5E5" opacity="0.6" />
+        <circle cx="100" cy="105" r="38" fill="#FFE0C2" />
+        <ellipse cx="75" cy="115" rx="7" ry="4" fill="#FFB5B5" opacity="0.5" />
+        <ellipse cx="125" cy="115" rx="7" ry="4" fill="#FFB5B5" opacity="0.5" />
 
         {/* 眼睛 */}
         <g className="origin-center animate-blink" style={{ transformOrigin: '100px 100px' }}>
@@ -33,7 +33,7 @@ export default function AIAvatar({ size = 200, className = '' }: { size?: number
         <line x1="126" y1="98" x2="132" y2="96" stroke="#404040" strokeWidth="2" />
 
         {/* 嘴巴 */}
-        <path d="M93 120 Q100 125, 107 120" stroke="#A3A3A3" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        <path d="M93 120 Q100 125, 107 120" stroke="#D4845A" strokeWidth="1.5" fill="none" strokeLinecap="round" />
 
         {/* 头发 */}
         <path d="M72 85 C75 72, 85 65, 100 65 C115 65, 125 72, 128 85" stroke="#1A1A1A" strokeWidth="4" fill="#1A1A1A" strokeLinecap="round" />
