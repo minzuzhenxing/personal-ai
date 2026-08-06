@@ -26,7 +26,7 @@ export default function ChatBubble() {
                 initial={{ scale: 0, rotate: -90 }}
                 animate={{ scale: 1, rotate: 0 }}
                 exit={{ scale: 0, rotate: 90 }}
-                className="w-6 h-6 text-white"
+                className="w-6 h-6 text-black"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -37,7 +37,7 @@ export default function ChatBubble() {
                 initial={{ scale: 0, rotate: 90 }}
                 animate={{ scale: 1, rotate: 0 }}
                 exit={{ scale: 0, rotate: -90 }}
-                className="w-6 h-6 text-white"
+                className="w-6 h-6 text-black"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
