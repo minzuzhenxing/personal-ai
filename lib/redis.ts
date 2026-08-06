@@ -140,8 +140,10 @@ async function createUpstashStore(): Promise<IRedisStore> {
     async hgetall(key: string) { return await client.hgetall(key); },
     async hget(key: string, field: string) { return await client.hget(key, field); },
     async hset(key: string, kv: Record<string, string>) {
-      // Upstash hset 支持直接传对象
-      return await client.hset(key, kv as Record<string, unknown>);
+      // 兼容 Upstash v1：展开为 field, value 平铺参数
+      const entries = Object.entries(kv);
+      if (entries.length === 0) return 0;
+      return await (client as any).hset(key, ...entries.flat());
     },
     async hdel(key: string, ...fields: string[]) {
       return await client.hdel(key, ...fields);
@@ -153,7 +155,7 @@ async function createUpstashStore(): Promise<IRedisStore> {
     async zadd(key: string, ...scoreMembers: Array<{ score: number; member: string }>) {
       let added = 0;
       for (const sm of scoreMembers) {
-        const result = await client.zadd(key, { score: sm.score, member: sm.member });
+        const result = await (client as any).zadd(key, sm.score, sm.member);
         if (result !== null && result !== undefined) added++;
       }
       return added;

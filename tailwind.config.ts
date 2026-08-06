@@ -8,44 +8,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0f4ff',
-          100: '#dbe4ff',
-          200: '#bac8ff',
-          300: '#91a7ff',
-          400: '#748ffc',
-          500: '#5c7cfa',
-          600: '#4c6ef5',
-          700: '#4263eb',
-          800: '#3b5bdb',
-          900: '#364fc7',
-          950: '#2b3fa0',
+        surface: {
+          DEFAULT: '#0A0A0A',
+          50: '#F5F5F5',
+          100: '#E5E5E5',
+          200: '#CCCCCC',
+          300: '#A3A3A3',
+          400: '#737373',
+          500: '#525252',
+          600: '#404040',
+          700: '#2A2A2A',
+          800: '#1A1A1A',
+          900: '#0D0D0D',
+          950: '#050505',
         },
-        accent: {
-          50: '#fff0f6',
-          100: '#ffdeeb',
-          200: '#fcc2d7',
-          300: '#faa2c1',
-          400: '#f783ac',
-          500: '#f06595',
-          600: '#e64980',
-          700: '#d6336c',
-          800: '#c2255c',
-          900: '#a61e4d',
-        },
-        tech: '#22d3ee',
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.5s ease-out',
+        'fade-in': 'fadeIn 0.6s ease-out',
+        'slide-up': 'slideUp 0.6s ease-out',
         'pulse-dot': 'pulseDot 1.4s infinite ease-in-out both',
-        'shimmer': 'shimmer 2s linear infinite',
         'float': 'float 3s ease-in-out infinite',
         'blink': 'blink 4s ease-in-out infinite',
         'typewriter': 'typewriter 1s step-end infinite',
         'pulse-ring': 'pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'scroll-hint': 'scrollHint 2s ease-in-out infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        'reveal-line': 'revealLine 1s ease-out forwards',
+        'tick': 'tick 0.4s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
@@ -53,20 +41,16 @@ const config: Config = {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         pulseDot: {
           '0%, 80%, 100%': { transform: 'scale(0)' },
-          '40%': { transform: 'scale(1)' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
+          '40%': { transform: 'scale(1.2)' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-12px)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
         blink: {
           '0%, 90%, 100%': { transform: 'scaleY(1)' },
@@ -77,16 +61,20 @@ const config: Config = {
           '50%': { opacity: '0' },
         },
         pulseRing: {
-          '0%': { transform: 'scale(1)', opacity: '1' },
-          '100%': { transform: 'scale(1.8)', opacity: '0' },
+          '0%': { transform: 'scale(1)', opacity: '0.8' },
+          '100%': { transform: 'scale(2)', opacity: '0' },
         },
         scrollHint: {
-          '0%, 100%': { transform: 'translateY(0)', opacity: '0.6' },
+          '0%, 100%': { transform: 'translateY(0)', opacity: '0.4' },
           '50%': { transform: 'translateY(8px)', opacity: '1' },
         },
-        glow: {
-          '0%': { boxShadow: '0 0 5px rgba(92, 124, 250, 0.3), 0 0 20px rgba(92, 124, 250, 0.1)' },
-          '100%': { boxShadow: '0 0 10px rgba(92, 124, 250, 0.5), 0 0 40px rgba(92, 124, 250, 0.2)' },
+        revealLine: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        },
+        tick: {
+          '0%': { transform: 'scaleX(0)', opacity: '0' },
+          '100%': { transform: 'scaleX(1)', opacity: '1' },
         },
       },
     },

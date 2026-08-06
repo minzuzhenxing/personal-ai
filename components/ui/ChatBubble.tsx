@@ -16,10 +16,9 @@ export default function ChatBubble() {
         aria-label="AI 对话"
       >
         {/* 脉冲环 */}
-        <span className="absolute inset-0 rounded-full bg-primary-500/30 animate-pulse-ring" />
+        <span className="absolute inset-0 rounded-full bg-white/20 animate-pulse-ring" />
 
-        {/* 按钮主体 */}
-        <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/30 flex items-center justify-center transition-transform group-hover:scale-110 active:scale-95">
+        <div className="relative w-14 h-14 rounded-full bg-white text-black shadow-lg shadow-white/10 flex items-center justify-center transition-transform group-hover:scale-110 active:scale-95">
           <AnimatePresence mode="wait">
             {open ? (
               <motion.svg
@@ -71,11 +70,8 @@ export default function ChatBubble() {
             className="fixed bottom-24 right-6 z-50 w-[380px] h-[520px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] rounded-2xl overflow-hidden shadow-2xl border border-gray-700/60"
             style={{ background: 'rgba(15, 23, 42, 0.97)' }}
           >
-            {/* 面板头部 */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-800/60 bg-gray-900/80">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xs font-bold">
-                AI
-              </div>
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-surface-700/30 bg-surface/95">
+              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black text-xs font-bold">AI</div>
               <div>
                 <h3 className="text-sm font-semibold text-white">AI 数字分身</h3>
                 <p className="text-[10px] text-gray-400">基于记忆的智能问答</p>

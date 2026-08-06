@@ -81,7 +81,7 @@ export const RESUME_DATA = {
   stats: [
     { label: '年龄', value: '21', suffix: '岁', icon: '🎂' },
     { label: '就读院校', value: '东北大学', suffix: '', icon: '🎓' },
-    { label: '项目经验', value: '3', suffix: '个', icon: '💼' },
+    { label: '项目经验', value: '4', suffix: '个', icon: '💼' },
     { label: '核心技能', value: '8', suffix: '+', icon: '⚡' },
   ],
 
@@ -133,6 +133,18 @@ export const RESUME_DATA = {
   // 项目经验
   projects: [
     {
+      name: '个人 AI 数字分身（已上线）',
+      role: '独立开发',
+      techStack: ['Next.js 14', 'TypeScript', 'LangChain', '通义千问', 'Upstash Redis', 'Framer Motion', 'Vercel'],
+      description: '基于 LangChain 框架和通义千问大模型构建的个人 AI 数字分身展示网站，已部署上线并获得独立域名。实现 AI 智能问答、长期记忆系统、对话式记忆自动提取等核心功能。',
+      details: [
+        '独立完成全栈开发与部署，使用 Next.js 14 App Router + TypeScript，搭建公开端展示页与管理端 AI 记忆构建系统',
+        '基于 LangChain 集成通义千问 qwen-plus 大模型，设计短期记忆+长期记忆（RAG 检索增强）双层记忆架构',
+        '前端采用 Framer Motion 实现滚动驱动动画效果，后端通过 Upstash Redis 实现记忆云端持久化',
+      ],
+      color: 'bg-white/80',
+    },
+    {
       name: '智慧校园多端课程管理系统',
       role: 'AI 模块负责人',
       techStack: ['SpringBoot', 'MyBatis', 'SpringAI', 'Dify', '前后端分离'],
@@ -142,7 +154,7 @@ export const RESUME_DATA = {
         '基于 Dify 平台自主搭建 AI 工作流，结合校园场景对大模型进行针对性微调',
         '落地 AI 对话答疑、课程数据智能分析、课堂笔记自动整理、课程学习总结生成等功能',
       ],
-      color: 'from-primary-500 to-cyan-400',
+      color: 'bg-white/80',
     },
     {
       name: '医疗微服务管理系统',

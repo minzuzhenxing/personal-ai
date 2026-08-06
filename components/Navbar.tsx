@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RESUME_DATA } from '@/lib/config';
 
 const NAV_ITEMS = [
-  { id: 'about', label: '关于' },
-  { id: 'education', label: '教育' },
-  { id: 'experience', label: '经历' },
-  { id: 'projects', label: '项目' },
-  { id: 'skills', label: '技能' },
-  { id: 'contact', label: '联系' },
+  { id: 'about', label: 'About' },
+  { id: 'education', label: 'Edu' },
+  { id: 'experience', label: 'Exp' },
+  { id: 'projects', label: 'Proj' },
+  { id: 'skills', label: 'Skill' },
+  { id: 'contact', label: 'Contact' },
 ];
 
 export default function Navbar() {
@@ -55,17 +55,11 @@ export default function Navbar() {
           transition={{ duration: 0.3 }}
           className="fixed top-0 left-0 right-0 z-40"
         >
-          <div className="bg-gray-950/80 backdrop-blur-xl border-b border-gray-800/40">
-            <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-              {/* Logo */}
-              <button
-                onClick={() => scrollTo('hero')}
-                className="flex items-center gap-2 text-sm font-semibold text-white hover:text-primary-400 transition-colors"
-              >
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xs font-bold">
-                  {RESUME_DATA.name[0]}
-                </div>
-                <span className="hidden sm:inline">{RESUME_DATA.name}</span>
+          <div className="bg-surface/90 backdrop-blur-xl border-b border-surface-700/20">
+            <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+              <button onClick={() => scrollTo('hero')} className="flex items-center gap-2 text-sm font-semibold text-white hover:text-surface-400 transition-colors">
+                <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center text-black text-xs font-bold">{RESUME_DATA.name[0]}</div>
+                <span className="hidden sm:inline tracking-wide">{RESUME_DATA.name}</span>
               </button>
 
               {/* 导航链接 */}
@@ -83,7 +77,7 @@ export default function Navbar() {
                     {activeSection === item.id && (
                       <motion.div
                         layoutId="nav-active"
-                        className="absolute inset-0 bg-primary-500/15 border border-primary-500/30 rounded-lg"
+                        className="absolute inset-0 bg-white/10 rounded-lg"
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                       />
                     )}

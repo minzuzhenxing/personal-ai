@@ -2,157 +2,108 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========== 基础样式 ========== */
 @layer base {
   body {
-    @apply bg-gray-950 text-gray-100 antialiased;
+    @apply bg-surface text-white antialiased;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
       'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   }
 
-  /* 自定义滚动条 */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-gray-700 rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-600;
-  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-surface-600 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-surface-500; }
+
+  ::selection { @apply bg-white text-black; }
 }
 
-/* ========== 工具类 ========== */
 @layer components {
-  /* 玻璃态卡片 */
+  /* 极简玻璃卡片 */
   .glass-card {
-    @apply bg-gray-900/80 backdrop-blur-xl border border-gray-800/60 rounded-2xl shadow-2xl;
+    @apply bg-surface-800/80 backdrop-blur-xl border border-surface-700/40 rounded-2xl;
   }
-
-  /* 渐变文字 */
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary-400 via-primary-500 to-accent-500 bg-clip-text text-transparent;
+  .glass-card:hover {
+    border-color: rgba(255,255,255,0.12);
   }
 
   /* 输入框 */
   .input-field {
-    @apply w-full px-4 py-3 bg-gray-800/60 border border-gray-700/60 rounded-xl
-           text-gray-100 placeholder-gray-500
-           focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50
-           transition-all duration-200;
+    @apply w-full px-4 py-3 bg-surface-800/80 border border-surface-600/40 rounded-xl
+           text-white placeholder-surface-400
+           focus:outline-none focus:border-surface-300
+           transition-all duration-300;
   }
 
-  /* 按钮基础 */
+  /* 按钮 */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium
-           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm
+           transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed;
   }
-
   .btn-primary {
-    @apply btn bg-gradient-to-r from-primary-600 to-primary-700 text-white
-           hover:from-primary-500 hover:to-primary-600
-           shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40
+    @apply btn bg-white text-black hover:bg-surface-200
            active:scale-[0.98];
   }
-
   .btn-ghost {
-    @apply btn bg-gray-800/60 text-gray-300 border border-gray-700/60
-           hover:bg-gray-700/60 hover:text-gray-100;
+    @apply btn bg-transparent text-surface-300 border border-surface-600/40
+           hover:border-surface-400 hover:text-white;
   }
-
   .btn-danger {
-    @apply btn bg-red-600/20 text-red-400 border border-red-500/30
-           hover:bg-red-600/30 hover:text-red-300;
+    @apply btn bg-red-500/10 text-red-400 border border-red-500/20
+           hover:bg-red-500/20;
   }
 
   /* 消息气泡 */
   .message-bubble {
     @apply max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap;
   }
-
   .message-user {
-    @apply message-bubble bg-primary-600/20 border border-primary-500/30 text-gray-100;
+    @apply message-bubble bg-surface-700 border border-surface-600/40 text-white;
   }
-
   .message-ai {
-    @apply message-bubble bg-gray-800/80 border border-gray-700/60 text-gray-200;
+    @apply message-bubble bg-surface-800/80 border border-surface-700/40 text-surface-200;
   }
 
   /* 打字动画 */
   .typing-dots {
     @apply flex items-center gap-1 px-4 py-3;
   }
-
   .typing-dots span {
-    @apply w-2 h-2 bg-gray-400 rounded-full animate-pulse-dot;
+    @apply w-2 h-2 bg-surface-400 rounded-full animate-pulse-dot;
   }
+  .typing-dots span:nth-child(2) { animation-delay: 0.16s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.32s; }
 
-  .typing-dots span:nth-child(2) {
-    animation-delay: 0.16s;
-  }
-
-  .typing-dots span:nth-child(3) {
-    animation-delay: 0.32s;
-  }
-
-  /* Markdown 内容样式 */
+  /* Markdown */
   .markdown-content h1 { @apply text-xl font-bold mt-4 mb-2 text-white; }
   .markdown-content h2 { @apply text-lg font-bold mt-3 mb-2 text-white; }
-  .markdown-content h3 { @apply text-base font-semibold mt-3 mb-1 text-gray-100; }
+  .markdown-content h3 { @apply text-base font-semibold mt-3 mb-1 text-surface-100; }
   .markdown-content p { @apply my-2 leading-relaxed; }
   .markdown-content ul { @apply list-disc list-inside my-2 space-y-1; }
   .markdown-content ol { @apply list-decimal list-inside my-2 space-y-1; }
-  .markdown-content code { @apply bg-gray-800 px-1.5 py-0.5 rounded text-primary-300 text-xs; }
-  .markdown-content pre { @apply bg-gray-900 p-4 rounded-xl overflow-x-auto my-3 border border-gray-800; }
-  .markdown-content pre code { @apply bg-transparent p-0 text-gray-200; }
-  .markdown-content blockquote { @apply border-l-4 border-primary-500/50 pl-4 my-2 text-gray-400 italic; }
-  .markdown-content a { @apply text-primary-400 hover:text-primary-300 underline; }
-  .markdown-content strong { @apply text-gray-100 font-semibold; }
+  .markdown-content code { @apply bg-surface-700 px-1.5 py-0.5 rounded text-surface-200 text-xs; }
+  .markdown-content pre { @apply bg-surface-800 p-4 rounded-xl overflow-x-auto my-3 border border-surface-700; }
+  .markdown-content pre code { @apply bg-transparent p-0 text-surface-200; }
+  .markdown-content blockquote { @apply border-l-2 border-surface-600 pl-4 my-2 text-surface-400 italic; }
+  .markdown-content a { @apply text-surface-300 hover:text-white underline underline-offset-2; }
+  .markdown-content strong { @apply text-white font-semibold; }
 
-  /* Section 分隔装饰 */
+  /* Section 分隔 */
   .section-divider {
-    @apply relative h-24 mx-auto max-w-5xl;
-  }
-  .section-divider::before {
-    content: '';
-    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
-    width: 60px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(92, 124, 250, 0.4), transparent);
+    @apply relative h-20 mx-auto max-w-5xl;
   }
   .section-divider::after {
     content: '';
-    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full;
-    width: 6px;
-    height: 6px;
-    background: linear-gradient(135deg, #5c7cfa, #f06595);
-    box-shadow: 0 0 10px rgba(92, 124, 250, 0.4);
+    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   }
 
-  /* 玻璃卡片悬停效果 */
-  .glass-card-hover {
-    @apply glass-card transition-all duration-300;
+  /* 边框发光 */
+  .border-glow {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
   }
-  .glass-card-hover:hover {
-    @apply border-primary-500/40;
-    box-shadow: 0 0 20px rgba(92, 124, 250, 0.1), 0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-
-  /* 渐变边框 */
-  .gradient-border {
-    @apply relative rounded-2xl;
-    background: linear-gradient(135deg, rgba(92, 124, 250, 0.3), rgba(240, 101, 149, 0.3));
-    padding: 1px;
-  }
-  .gradient-border > * {
-    @apply bg-gray-900 rounded-2xl;
-  }
-
-  /* 文字发光 */
-  .text-glow {
-    text-shadow: 0 0 20px rgba(92, 124, 250, 0.3), 0 0 40px rgba(92, 124, 250, 0.1);
+  .border-glow:hover {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
   }
 }

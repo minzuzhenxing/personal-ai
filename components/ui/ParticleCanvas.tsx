@@ -47,10 +47,9 @@ export default function ParticleCanvas() {
         // Draw particle
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(116, 143, 252, ${p.opacity})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity * 0.6})`;
         ctx.fill();
 
-        // Draw connections
         for (let j = i + 1; j < particles.length; j++) {
           const q = particles[j];
           const dx = p.x - q.x;
@@ -60,7 +59,7 @@ export default function ParticleCanvas() {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(116, 143, 252, ${0.08 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.05 * (1 - dist / 120)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
